@@ -57,7 +57,8 @@ export default function TemplatesPage() {
                     {filteredTemplates.map((template) => (
                         <Card
                             key={template.id}
-                            className="bg-[#2a2d37] border-0 overflow-hidden group hover:ring-2 hover:ring-indigo-500 transition-all duration-300 flex flex-col"
+                            onClick={() => router.push(`/builder/new?template=${template.id}`)}
+                            className="bg-[#2a2d37] border-0 overflow-hidden group hover:ring-2 hover:ring-indigo-500 transition-all duration-300 flex flex-col cursor-pointer"
                         >
                             <div className="relative aspect-[4/3] overflow-hidden">
                                 {template.preview_image ? (
@@ -72,8 +73,7 @@ export default function TemplatesPage() {
                                 )}
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
                                     <Button
-                                        onClick={() => router.push(`/builder/new?template=${template.id}`)}
-                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 px-8 rounded-full shadow-lg"
+                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 px-8 rounded-full shadow-lg pointer-events-none"
                                     >
                                         Use This Template
                                     </Button>
