@@ -123,11 +123,27 @@ function TemplatesList() {
                 </div>
 
                 {filteredTemplates.length === 0 && (
-                    <div className="text-center py-24">
-                        <p className="text-gray-500 italic">No templates found matching your search.</p>
-                        <Button variant="link" onClick={() => setSearch("")} className="text-indigo-400">
-                            Clear search
-                        </Button>
+                    <div className="text-center py-24 bg-[#2a2d37]/30 rounded-3xl border border-white/5 border-dashed">
+                        {search ? (
+                            <>
+                                <p className="text-gray-500 italic mb-4">No templates found matching your search.</p>
+                                <Button variant="link" onClick={() => setSearch("")} className="text-indigo-400">
+                                    Clear search
+                                </Button>
+                            </>
+                        ) : (
+                            <div className="max-w-md mx-auto">
+                                <Rocket className="h-12 w-12 text-indigo-500 mx-auto mb-4 opacity-50" />
+                                <h3 className="text-xl font-bold mb-2 text-white">Templates coming soon</h3>
+                                <p className="text-gray-400">
+                                    We're rebuilding our gallery with unique, premium styles.
+                                    In the meantime, you can start with a blank canvas from your dashboard.
+                                </p>
+                                <Button asChild className="mt-8 bg-indigo-600 hover:bg-indigo-700 rounded-full h-12 px-8">
+                                    <Link href="/builder/new">Start with Blank Canvas</Link>
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 )}
             </main>

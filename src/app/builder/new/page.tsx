@@ -54,6 +54,7 @@ function NewBuilderContent() {
         links: template.links,
         embeds: template.embeds,
         profile_image_url: null,
+        styles: template.styles,
         subdomain: "guest-draft",
         is_published: false,
     };

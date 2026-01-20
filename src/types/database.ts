@@ -29,6 +29,37 @@ export interface Site {
     embeds: Embed[];
     background_color: string;
     background_image_url: string | null;
+    styles: {
+        container: {
+            maxWidth: string;
+            padding: string;
+            textAlign: "left" | "center" | "right";
+            backgroundGradient?: string;
+        };
+        typography: {
+            fontFamily: "sans" | "serif" | "mono" | "system-ui";
+            headingSize: string;
+            textColor: string;
+        };
+        buttons: {
+            shape: "rounded" | "rounded-full" | "rounded-lg" | "rounded-none" | "pill" | "square";
+            bgColor: string;
+            hoverBg: string;
+            shadow: "sm" | "md" | "lg" | "xl" | "none";
+            border?: string;
+            textColor?: string;
+        };
+        profile: {
+            borderRadius: string;
+            shadow: string;
+            border: string;
+        };
+        sections: {
+            spacing: string;
+            cardBg: string;
+            cardShadow: string;
+        };
+    };
     is_published: boolean;
     custom_domain: string | null;
     created_at: string;
