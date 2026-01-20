@@ -3,7 +3,23 @@
 import { useEffect } from "react";
 import type { Site } from "@/types/database";
 import Image from "next/image";
-import { ExternalLink, Link as LinkIcon, Twitter, Instagram, Youtube, Github, Linkedin, Facebook, Mail, Globe } from "lucide-react";
+import {
+    ExternalLink,
+    Link as LinkIcon,
+    Twitter,
+    Instagram,
+    Youtube,
+    Github,
+    Linkedin,
+    Facebook,
+    Mail,
+    Globe,
+    Info,
+    ShoppingCart,
+    Code,
+    FileText,
+    MessageCircle
+} from "lucide-react";
 
 interface SiteRendererProps {
     site: Site;
@@ -11,6 +27,7 @@ interface SiteRendererProps {
 }
 
 const iconMap: Record<string, any> = {
+    // Legacy / Normalized keys
     link: LinkIcon,
     twitter: Twitter,
     instagram: Instagram,
@@ -19,8 +36,24 @@ const iconMap: Record<string, any> = {
     linkedin: Linkedin,
     facebook: Facebook,
     email: Mail,
+    mail: Mail,
     globe: Globe,
     tiktok: LinkIcon,
+    // New keys from templates
+    info: Info,
+    shoppingcart: ShoppingCart,
+    code: Code,
+    filetext: FileText,
+    messagecircle: MessageCircle,
+    // Title case fallback
+    Twitter: Twitter,
+    Instagram: Instagram,
+    Github: Github,
+    Info: Info,
+    ShoppingCart: ShoppingCart,
+    Code: Code,
+    FileText: FileText,
+    Mail: Mail,
 };
 
 export function SiteRenderer({ site, isPro }: SiteRendererProps) {

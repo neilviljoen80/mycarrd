@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Create sites table
 CREATE TABLE IF NOT EXISTS sites (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE, -- Made nullable
   subdomain TEXT UNIQUE NOT NULL,
   title TEXT NOT NULL DEFAULT 'My Site',
   description TEXT DEFAULT '',
@@ -62,23 +62,23 @@ CREATE POLICY "Public can read published sites"
   FOR SELECT
   USING (is_published = TRUE);
 
--- Users can insert their own sites
-CREATE POLICY "Users can insert own sites"
+-- Anyone can insert a site (allows guest creation)
+CREATE POLICY "Anyone can insert sites"
   ON sites
   FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (TRUE);
 
--- Users can update their own sites
+-- Users can update their own sites OR guests can update sites they just created (identified by site id)
 CREATE POLICY "Users can update own sites"
   ON sites
   FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id OR user_id IS NULL);
 
--- Users can delete their own sites
+-- Users can delete their own sites OR guests can delete their sites
 CREATE POLICY "Users can delete own sites"
   ON sites
   FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id OR user_id IS NULL);
 
 -- Create storage bucket for site images
 INSERT INTO storage.buckets (id, name, public)

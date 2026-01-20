@@ -31,14 +31,17 @@ export default async function SitePage({ params }: { params: Promise<{ domain: s
         notFound();
     }
 
-    // Get user data to check Pro status
-    const { data: userData } = await (supabase
-        .from("users") as any)
-        .select("is_pro")
-        .eq("id", (site as any).user_id)
-        .maybeSingle();
+    // Get user data to check Pro status (if user exists)
+    let isPro = false;
+    if ((site as any).user_id) {
+        const { data: userData } = await (supabase
+            .from("users") as any)
+            .select("is_pro")
+            .eq("id", (site as any).user_id)
+            .maybeSingle();
 
-    const isPro = userData ? (userData as any).is_pro : false;
+        isPro = userData ? (userData as any).is_pro : false;
+    }
 
     return <SiteRenderer site={site as any} isPro={isPro} />;
 }

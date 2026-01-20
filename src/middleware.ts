@@ -32,22 +32,39 @@ export async function middleware(request: NextRequest) {
         }
     );
 
+    // Use more defensive host retrieval for Edge compatibility
     const host = request.headers.get("host") || "";
+    const pathname = request.nextUrl.pathname;
 
-    // Check for subdomain or custom domain
-    const subdomain = parseSubdomain(host);
-    const customDomain = isCustomDomain(host);
+    // Safely parse subdomain
+    let subdomain: string | null = null;
+    let customDomain = false;
 
-    // If subdomain or custom domain detected, rewrite to site rendering page
-    if (subdomain || customDomain) {
-        const domain = subdomain || host.split(":")[0];
-        const url = request.nextUrl.clone();
-        url.pathname = `/site/${domain}`;
-        return NextResponse.rewrite(url);
+    try {
+        subdomain = parseSubdomain(host);
+        customDomain = isCustomDomain(host);
+    } catch (e) {
+        console.error("Failed to parse domain:", e);
     }
 
-    // Protect dashboard and builder routes
-    const protectedPaths = ["/dashboard", "/builder"];
+    // If root path (no subdomain) OR it's a known non-site path, serve the landing page
+    if (!subdomain && !customDomain) {
+        // Proceed to next middleware/page
+    } else {
+        // If subdomain detected, rewrite to site rendering page unless it's an internal route
+        const internalPaths = ["/_next", "/api", "/auth", "/dashboard", "/builder", "/site", "/favicon.ico"];
+        const isInternalPath = internalPaths.some(path => pathname.startsWith(path));
+
+        if (!isInternalPath) {
+            const domain = subdomain || host.split(":")[0];
+            const url = request.nextUrl.clone();
+            url.pathname = `/site/${domain}`;
+            return NextResponse.rewrite(url);
+        }
+    }
+
+    // Protect dashboard routes
+    const protectedPaths = ["/dashboard"];
     const isProtectedPath = protectedPaths.some((path) =>
         request.nextUrl.pathname.startsWith(path)
     );
@@ -60,7 +77,7 @@ export async function middleware(request: NextRequest) {
         if (!user) {
             const url = request.nextUrl.clone();
             url.pathname = "/auth/login";
-            url.searchParams.set("redirectTo", request.nextUrl.pathname);
+            url.searchParams.set("redirectTo", pathname);
             return NextResponse.redirect(url);
         }
     }

@@ -16,15 +16,22 @@ export async function updateSite(
         data: { user },
     } = await supabase.auth.getUser();
 
+    // Remove mandatory redirect to login
+    /*
     if (!user) {
         redirect("/auth/login");
     }
+    */
 
-    const { error } = await (supabase
-        .from("sites") as any)
-        .update(data)
-        .eq("id", siteId)
-        .eq("user_id", user.id);
+    let query = (supabase.from("sites") as any).update(data).eq("id", siteId);
+
+    if (user) {
+        query = query.eq("user_id", user.id);
+    } else {
+        query = query.is("user_id", null);
+    }
+
+    const { error } = await query;
 
     if (error) {
         throw new Error("Failed to update site");

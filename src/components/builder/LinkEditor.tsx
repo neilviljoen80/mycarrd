@@ -23,6 +23,11 @@ const iconOptions = [
     "tiktok",
     "email",
     "globe",
+    "info",
+    "shoppingcart",
+    "code",
+    "filetext",
+    "messagecircle",
 ];
 
 export function LinkEditor({ links, onChange }: LinkEditorProps) {

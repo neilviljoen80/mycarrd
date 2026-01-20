@@ -2,45 +2,57 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { generateSubdomain } from "@/lib/subdomain";
+import { getTemplateById } from "@/lib/templates";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function createSite() {
+export async function createSite(templateId: string = "blank") {
     const supabase = await createClient();
 
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
+    // Remove mandatory redirect to login
+    /*
     if (!user) {
         redirect("/auth/login");
     }
+    */
 
-    // Get user data
-    const { data: userData } = await (supabase
-        .from("users") as any)
-        .select("username, is_pro")
-        .eq("id", user.id)
-        .single();
+    const template = getTemplateById(templateId);
 
-    if (!userData) {
-        throw new Error("User not found");
-    }
+    let username = "guest";
+    let userId = null;
 
-    // Check site limit for free tier
-    if (!userData.is_pro) {
-        const { count } = await (supabase
-            .from("sites") as any)
-            .select("*", { count: "exact", head: true })
-            .eq("user_id", user.id);
+    if (user) {
+        userId = user.id;
+        // Get user data
+        const { data: userData } = await (supabase
+            .from("users") as any)
+            .select("username, is_pro")
+            .eq("id", user.id)
+            .single();
 
-        if (count !== null && count >= 3) {
-            throw new Error("Free tier limited to 3 sites. Upgrade to Pro for unlimited sites.");
+        if (userData) {
+            username = userData.username;
+
+            // Check site limit for free tier
+            if (!userData.is_pro) {
+                const { count } = await (supabase
+                    .from("sites") as any)
+                    .select("*", { count: "exact", head: true })
+                    .eq("user_id", user.id);
+
+                if (count !== null && count >= 3) {
+                    throw new Error("Free tier limited to 3 sites. Upgrade to Pro for unlimited sites.");
+                }
+            }
         }
     }
 
-    // Generate unique subdomain
-    let subdomain = generateSubdomain(userData.username);
+    // Generate unique subdomain based on username or template title
+    let subdomain = generateSubdomain(username === "guest" ? template.title.split(" ")[0] : username);
     let attempts = 0;
 
     while (attempts < 5) {
@@ -52,31 +64,35 @@ export async function createSite() {
 
         if (!existing) break;
 
-        subdomain = generateSubdomain(userData.username);
+        subdomain = generateSubdomain(username === "guest" ? template.title.split(" ")[0] : username);
         attempts++;
     }
 
-    // Create site
+    // Create site with template data
     const { data: site, error } = await (supabase
         .from("sites") as any)
         .insert({
-            user_id: user.id,
+            user_id: userId,
             subdomain,
-            title: "My Site",
-            description: "",
-            links: [],
-            embeds: [],
-            background_color: "#ffffff",
+            title: template.title,
+            description: template.description,
+            links: template.links,
+            embeds: template.embeds,
+            background_color: template.background_color,
             is_published: true,
         })
         .select()
         .single();
 
     if (error) {
+        console.error("Create site error:", error);
         throw new Error("Failed to create site");
     }
 
-    revalidatePath("/dashboard");
+    if (user) {
+        revalidatePath("/dashboard");
+    }
+
     return site.id;
 }
 
@@ -87,15 +103,16 @@ export async function deleteSite(siteId: string) {
         data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-        redirect("/auth/login");
+    // Allow deletion if user owns it OR if it's a guest site (RLS will check)
+    let query = (supabase.from("sites") as any).delete().eq("id", siteId);
+
+    if (user) {
+        query = query.eq("user_id", user.id);
+    } else {
+        query = query.is("user_id", null);
     }
 
-    const { error } = await (supabase
-        .from("sites") as any)
-        .delete()
-        .eq("id", siteId)
-        .eq("user_id", user.id);
+    const { error } = await query;
 
     if (error) {
         throw new Error("Failed to delete site");

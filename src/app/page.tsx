@@ -1,146 +1,129 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { CreateGuestSiteButton } from "@/components/home/CreateGuestSiteButton";
+import { Card, CardContent } from "@/components/ui/card";
+import { templates } from "@/lib/templates";
+
+const categories = ["All", "Profile", "Landing", "Portfolio", "Blank"] as const;
 
 export default function HomePage() {
+    const [activeCategory, setActiveCategory] = useState<typeof categories[number]>("All");
+
+    const filteredTemplates = templates.filter(template =>
+        activeCategory === "All" || template.category === activeCategory
+    );
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="min-h-screen bg-[#1a1c23] text-white selection:bg-indigo-500 selection:text-white">
+            {/* Header / Navigation */}
+            <header className="container mx-auto px-4 py-8 flex items-center justify-between">
+                <div className="text-2xl font-bold tracking-tighter">mycarrd</div>
+                <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
+                    {categories.map((category) => (
+                        <button
+                            key={category}
+                            onClick={() => setActiveCategory(category)}
+                            className={`transition-colors duration-200 hover:text-white ${activeCategory === category ? "text-indigo-400 border-b-2 border-indigo-400 pb-1" : ""
+                                }`}
+                        >
+                            {category}
+                        </button>
+                    ))}
+                </nav>
+                <div className="flex gap-4">
+                    <Button asChild variant="ghost" className="text-gray-400 hover:text-white">
+                        <Link href="/auth/login">Login</Link>
+                    </Button>
+                    <Link href="/auth/login">
+                        <Button className="bg-indigo-600 hover:bg-indigo-700">
+                            Get Started (free)
+                        </Button>
+                    </Link>
+                </div>
+            </header>
+
             {/* Hero Section */}
-            <div className="container mx-auto px-4 py-20">
-                <div className="text-center max-w-4xl mx-auto">
-                    <h1 className="text-6xl font-bold text-gray-900 mb-6">
-                        Your link-in-bio,<br />
-                        <span className="text-indigo-600">beautifully simple</span>
-                    </h1>
-                    <p className="text-xl text-gray-600 mb-8">
-                        Create stunning one-page websites with custom subdomains, X thread embeds, and more.
-                        No coding required.
-                    </p>
-                    <div className="flex gap-4 justify-center">
-                        <Button asChild size="lg">
-                            <Link href="/auth/login">Get Started Free</Link>
-                        </Button>
-                        <Button asChild variant="outline" size="lg">
-                            <Link href="#pricing">View Pricing</Link>
-                        </Button>
+            <section className="container mx-auto px-4 py-20 text-center bg-gradient-to-b from-indigo-900/10 to-transparent">
+                <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight">
+                    Welcome to mycarrd.online
+                </h1>
+                <p className="text-xl md:text-2xl text-indigo-200 mb-8 max-w-3xl mx-auto">
+                    Create your free link-in-bio in seconds.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                    <CreateGuestSiteButton size="lg" className="bg-white text-indigo-900 hover:bg-gray-100 px-12 py-6 text-lg rounded-full shadow-xl">
+                        Start Building Now
+                    </CreateGuestSiteButton>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto text-left py-12 border-t border-white/5">
+                    <div>
+                        <h3 className="text-indigo-400 font-bold mb-2">Custom Subdomains</h3>
+                        <p className="text-gray-400 text-sm">Grab your unique name instantly. No complex setup.</p>
+                    </div>
+                    <div>
+                        <h3 className="text-indigo-400 font-bold mb-2">Easy X Thread Embeds</h3>
+                        <p className="text-gray-400 text-sm">Showcase your best content directly on your page.</p>
+                    </div>
+                    <div>
+                        <h3 className="text-indigo-400 font-bold mb-2">Simple Builder</h3>
+                        <p className="text-gray-400 text-sm">Drag-and-drop experience. No coding required.</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* Features Section */}
-            <div className="container mx-auto px-4 py-16">
-                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Easy Builder</CardTitle>
-                            <CardDescription>
-                                Intuitive drag-and-drop interface to create your perfect page
-                            </CardDescription>
-                        </CardHeader>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Custom Subdomains</CardTitle>
-                            <CardDescription>
-                                Get your own subdomain like yourname.mycarrd.online instantly
-                            </CardDescription>
-                        </CardHeader>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>X/Twitter Embeds</CardTitle>
-                            <CardDescription>
-                                Embed your best threads directly on your page
-                            </CardDescription>
-                        </CardHeader>
-                    </Card>
-                </div>
-            </div>
-
-            {/* Pricing Section */}
-            <div id="pricing" className="container mx-auto px-4 py-16">
-                <h2 className="text-4xl font-bold text-center mb-12">
-                    Simple Pricing
+            {/* Main Section */}
+            <main id="templates" className="container mx-auto px-4 py-20 text-center">
+                <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
+                    Choose a Starting Point
                 </h2>
-                <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    {/* Free Tier */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Free</CardTitle>
-                            <CardDescription>
-                                <span className="text-3xl font-bold text-gray-900">$0</span>
-                                <span className="text-gray-600">/forever</span>
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <ul className="space-y-3">
-                                <li className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-green-500" />
-                                    <span>Up to 3 sites</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-green-500" />
-                                    <span>Custom subdomain</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-green-500" />
-                                    <span>X/Twitter embeds</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-green-500" />
-                                    <span>Unlimited links</span>
-                                </li>
-                            </ul>
-                            <Button asChild className="w-full mt-6">
-                                <Link href="/auth/login">Start Free</Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
 
-                    {/* Pro Tier */}
-                    <Card className="border-2 border-indigo-600">
-                        <CardHeader>
-                            <CardTitle className="text-indigo-600">Pro</CardTitle>
-                            <CardDescription>
-                                <span className="text-3xl font-bold text-gray-900">$9</span>
-                                <span className="text-gray-600">/year</span>
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <ul className="space-y-3">
-                                <li className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-green-500" />
-                                    <span>Unlimited sites</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-green-500" />
-                                    <span>Custom domain</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-green-500" />
-                                    <span>No branding badge</span>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-green-500" />
-                                    <span>Everything in Free</span>
-                                </li>
-                            </ul>
-                            <Button asChild className="w-full mt-6" variant="default">
-                                <Link href="/upgrade">Upgrade to Pro</Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
+                {/* Templates Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                    {filteredTemplates.map((template) => (
+                        <Card key={template.id} className="bg-[#2a2d37] border-0 overflow-hidden group hover:ring-2 hover:ring-indigo-500 transition-all duration-300">
+                            <CardContent className="p-0 relative aspect-[4/3]">
+                                {template.preview_image ? (
+                                    <div
+                                        className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                                        style={{ backgroundImage: `url(${template.preview_image})` }}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-[#1e2129]">
+                                        <div className="w-20 h-20 border-2 border-dashed border-gray-600 rounded-lg flex items-center justify-center mb-4">
+                                            <div className="text-gray-600 text-2xl font-bold">+</div>
+                                        </div>
+                                        <div className="text-gray-500 font-medium">Blank Canvas</div>
+                                    </div>
+                                )}
+
+                                {/* Overlay on Hover */}
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6">
+                                    <div className="text-center">
+                                        <h3 className="text-xl font-bold mb-2">{template.name}</h3>
+                                        <p className="text-sm text-gray-300 mb-6">{template.description}</p>
+                                        <CreateGuestSiteButton
+                                            templateId={template.id}
+                                            variant="default"
+                                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg"
+                                        >
+                                            Select Template
+                                        </CreateGuestSiteButton>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
-            </div>
+            </main>
 
             {/* Footer */}
-            <footer className="border-t bg-white">
-                <div className="container mx-auto px-4 py-8">
-                    <p className="text-center text-gray-600">
-                        © 2026 mycarrd.online. All rights reserved.
-                    </p>
-                </div>
+            <footer className="container mx-auto px-4 py-16 text-center text-gray-500 text-sm border-t border-white/5">
+                <p className="mb-2">Made for X creators.</p>
+                <p>© 2026 mycarrd.online. Inspired by simplicity.</p>
             </footer>
         </div>
     );
