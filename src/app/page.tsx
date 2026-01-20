@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CreateGuestSiteButton } from "@/components/home/CreateGuestSiteButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { templates } from "@/lib/templates";
+import { ArrowRight } from "lucide-react";
 
 const categories = ["All", "Profile", "Landing", "Portfolio", "Blank"] as const;
 
 export default function HomePage() {
     const [activeCategory, setActiveCategory] = useState<typeof categories[number]>("All");
+    const [hasDraft, setHasDraft] = useState(false);
+
+    useEffect(() => {
+        setHasDraft(!!localStorage.getItem("guest_site_draft"));
+    }, []);
 
     const filteredTemplates = templates.filter(template =>
         activeCategory === "All" || template.category === activeCategory
@@ -32,6 +38,16 @@ export default function HomePage() {
                     </Button>
                 </div>
             </header>
+
+            {/* Draft Notification */}
+            {hasDraft && (
+                <div className="bg-indigo-600 py-3 text-center animate-in fade-in slide-in-from-top duration-500">
+                    <Link href="/builder/new" className="flex items-center justify-center gap-2 text-sm font-bold hover:underline">
+                        <span>You have an unsaved draft! Continue building where you left off</span>
+                        <ArrowRight className="h-4 w-4" />
+                    </Link>
+                </div>
+            )}
 
             {/* Hero Section */}
             <section className="container mx-auto px-4 py-24 text-center overflow-hidden relative">
@@ -93,8 +109,8 @@ export default function HomePage() {
                                 key={category}
                                 onClick={() => setActiveCategory(category)}
                                 className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeCategory === category
-                                        ? "bg-indigo-600 text-white"
-                                        : "bg-white/5 text-gray-400 hover:bg-white/10"
+                                    ? "bg-indigo-600 text-white"
+                                    : "bg-white/5 text-gray-400 hover:bg-white/10"
                                     }`}
                             >
                                 {category}

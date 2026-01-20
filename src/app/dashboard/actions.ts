@@ -6,7 +6,7 @@ import { getTemplateById } from "@/lib/templates";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function createSite(templateId: string = "blank") {
+export async function createSite(templateId: string = "blank", draft?: any) {
     const supabase = await createClient();
 
     const {
@@ -17,7 +17,7 @@ export async function createSite(templateId: string = "blank") {
         throw new Error("Not authenticated");
     }
 
-    const template = getTemplateById(templateId);
+    const template = draft || getTemplateById(templateId);
 
     // Get user data
     const { data: userData } = await (supabase

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { templates } from "@/lib/templates";
-import { ArrowLeft, Rocket, Search, AlertCircle } from "lucide-react";
+import { ArrowLeft, Rocket, Search, AlertCircle, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -15,7 +15,12 @@ function TemplatesList() {
     const searchParams = useSearchParams();
     const errorMsg = searchParams.get("error");
     const [search, setSearch] = useState("");
+    const [hasDraft, setHasDraft] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        setHasDraft(!!localStorage.getItem("guest_site_draft"));
+    }, []);
 
     const filteredTemplates = templates.filter(t =>
         t.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -48,6 +53,16 @@ function TemplatesList() {
                     </div>
                 </div>
             </nav>
+
+            {/* Draft Notification */}
+            {hasDraft && (
+                <div className="bg-indigo-600 py-3 text-center">
+                    <Link href="/builder/new" className="flex items-center justify-center gap-2 text-sm font-bold hover:underline">
+                        <span>You have an unsaved draft! Continue building where you left off</span>
+                        <ArrowRight className="h-4 w-4" />
+                    </Link>
+                </div>
+            )}
 
             <main className="container mx-auto px-4 py-12">
                 <div className="mb-12 text-center">
