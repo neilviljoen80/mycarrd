@@ -9,29 +9,34 @@ export async function middleware(request: NextRequest) {
         },
     });
 
+    // Supabase client creation can fail if env vars are missing
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+        console.warn("Supabase env vars missing in middleware");
+        return response;
+    }
+
     // Create Supabase client for auth checks
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() {
-                    return request.cookies.getAll();
-                },
-                setAll(cookiesToSet: any[]) {
-                    cookiesToSet.forEach(({ name, value }: { name: string, value: string }) =>
-                        request.cookies.set(name, value)
-                    );
-                    response = NextResponse.next({
-                        request,
-                    });
-                    cookiesToSet.forEach(({ name, value, options }: { name: string, value: string, options: any }) =>
-                        response.cookies.set(name, value, options)
-                    );
-                },
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
+        cookies: {
+            getAll() {
+                return request.cookies.getAll();
             },
-        }
-    );
+            setAll(cookiesToSet: any[]) {
+                cookiesToSet.forEach(({ name, value }: { name: string, value: string }) =>
+                    request.cookies.set(name, value)
+                );
+                response = NextResponse.next({
+                    request,
+                });
+                cookiesToSet.forEach(({ name, value, options }: { name: string, value: string, options: any }) =>
+                    response.cookies.set(name, value, options)
+                );
+            },
+        },
+    });
 
     // Get host from headers
     const host = request.headers.get("host") || "";
@@ -57,12 +62,16 @@ export async function middleware(request: NextRequest) {
     if (isInternalPath) {
         // Protect dashboard routes
         if (pathname.startsWith("/dashboard")) {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                const loginUrl = request.nextUrl.clone();
-                loginUrl.pathname = "/auth/login";
-                loginUrl.searchParams.set("redirectTo", pathname);
-                return NextResponse.redirect(loginUrl);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    const loginUrl = request.nextUrl.clone();
+                    loginUrl.pathname = "/auth/login";
+                    loginUrl.searchParams.set("redirectTo", pathname);
+                    return NextResponse.redirect(loginUrl);
+                }
+            } catch (error) {
+                console.error("Middleware auth check failed:", error);
             }
         }
         return response;
