@@ -12,9 +12,10 @@ export default async function NewBuilderPage({
     let siteId: string;
     try {
         siteId = await createSite(templateId);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to create site from template:", error);
-        redirect("/dashboard?error=failed_to_create_site");
+        const message = error.message || "failed_to_create_site";
+        redirect(`/templates?error=${encodeURIComponent(message)}`);
     }
 
     if (siteId) {

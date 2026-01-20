@@ -32,7 +32,7 @@ export async function createSite(templateId: string = "blank") {
             .from("users") as any)
             .select("username, is_pro")
             .eq("id", user.id)
-            .single();
+            .maybeSingle();
 
         if (userData) {
             username = userData.username;
@@ -85,8 +85,8 @@ export async function createSite(templateId: string = "blank") {
         .single();
 
     if (error) {
-        console.error("Create site error:", error);
-        throw new Error("Failed to create site");
+        console.error("Create site error details:", error);
+        throw new Error(`Failed to create site: ${error.message}`);
     }
 
     if (user) {

@@ -6,10 +6,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { templates } from "@/lib/templates";
-import { ArrowLeft, Rocket, Search } from "lucide-react";
+import { ArrowLeft, Rocket, Search, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function TemplatesPage() {
+function TemplatesList() {
+    const searchParams = useSearchParams();
+    const errorMsg = searchParams.get("error");
     const [search, setSearch] = useState("");
     const router = useRouter();
 
@@ -51,6 +55,13 @@ export default function TemplatesPage() {
                     <p className="text-gray-400 text-lg max-w-2xl mx-auto">
                         Pick a starting point for your project. You can customize everything later in the builder.
                     </p>
+
+                    {errorMsg && (
+                        <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-lg max-w-2xl mx-auto flex items-center gap-3 text-red-400 text-sm">
+                            <AlertCircle className="h-5 w-5 shrink-0" />
+                            <p>Error: {errorMsg}</p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -110,5 +121,12 @@ export default function TemplatesPage() {
                 <p>Starting with a template is the fastest way to build your link-in-bio.</p>
             </footer>
         </div>
+    );
+}
+export default function TemplatesPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#1a1c23] flex items-center justify-center text-white">Loading...</div>}>
+            <TemplatesList />
+        </Suspense>
     );
 }

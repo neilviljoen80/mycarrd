@@ -1,4 +1,13 @@
-import { Link, Embed } from "@/types/database";
+export interface Link {
+    title: string;
+    url: string;
+    icon: string;
+}
+
+export interface Embed {
+    type: "x_thread";
+    url: string;
+}
 
 export interface Template {
     id: string;
@@ -14,59 +23,44 @@ export interface Template {
 
 export const templates: Template[] = [
     {
-        id: "blank",
-        name: "Blank Page",
-        category: "Blank",
-        title: "My Site",
-        description: "Start from scratch",
-        background_color: "#ffffff",
-        links: [],
-        embeds: [],
-    },
-    {
         id: "minimal-bio",
         name: "Minimal Bio",
         category: "Profile",
-        title: "About Me",
-        description: "Clean link list + profile pic",
-        background_color: "#ffffff",
+        title: "I Build Things",
+        description: "A clean, dark bio link for developers and builders.",
+        background_color: "#000000",
         links: [
-            { title: "Twitter / X", url: "https://x.com", icon: "twitter" },
-            { title: "LinkedIn", url: "https://linkedin.com", icon: "linkedin" },
+            { title: "X", url: "https://x.com", icon: "twitter" },
+            { title: "GitHub", url: "https://github.com", icon: "github" },
         ],
         embeds: [],
-        preview_image: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=800&auto=format&fit=crop&q=60",
+        preview_image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=60",
     },
     {
         id: "x-thread",
-        name: "X-Thread",
+        name: "X Thread Focus",
         category: "Landing",
-        title: "Featured Story",
-        description: "Featured X thread embed + links",
-        background_color: "#f8fafc",
+        title: "Latest Thoughts",
+        description: "Perfect for showcasing your best X threads and writing.",
+        background_color: "#15202b",
         links: [
-            { title: "Read More threads", url: "https://x.com", icon: "twitter" },
+            { title: "Follow me on X", url: "https://x.com", icon: "twitter" },
         ],
         embeds: [
-            {
-                type: "x_thread",
-                url: "https://twitter.com/X/status/1683326135114510336",
-                html: '<blockquote class="twitter-tweet"><p lang="en" dir="ltr">X is here! Follow us on <a href="https://t.co/l9uO7m1pZC">https://t.co/l9uO7m1pZC</a></p>&mdash; X (@X) <a href="https://twitter.com/X/status/1683326135114510336?ref_src=twsrc%5Etfw">July 24, 2023</a></blockquote>'
-            }
+            { type: "x_thread", url: "https://x.com/jack/status/20" }
         ],
-        preview_image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&auto=format&fit=crop&q=60",
+        preview_image: "https://images.unsplash.com/photo-1611605698335-8b1c336e0d9d?w=800&auto=format&fit=crop&q=60",
     },
     {
         id: "crypto",
-        name: "Crypto Hub",
+        name: "Crypto Wallet",
         category: "Portfolio",
-        title: "My Portfolio",
-        description: "Wallet preview + token links",
-        background_color: "#0c0a09",
+        title: "My Web3 Identity",
+        description: "Display your wallets and decentralized project links.",
+        background_color: "#0f172a",
         links: [
-            { title: "Buy My Token", url: "#", icon: "shoppingcart" },
-            { title: "Discord", url: "#", icon: "messagecircle" },
-            { title: "DexScanner", url: "#", icon: "globe" },
+            { title: "Ethereum", url: "0x...", icon: "wallet" },
+            { title: "Solana", url: "...", icon: "wallet" },
         ],
         embeds: [],
         preview_image: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800&auto=format&fit=crop&q=60",
@@ -75,46 +69,43 @@ export const templates: Template[] = [
         id: "creator-hub",
         name: "Creator Hub",
         category: "Landing",
-        title: "Get My Content",
-        description: "Subscription CTAs + teaser images",
-        background_color: "#fff1f2",
+        title: "Join My World",
+        description: "The central port for all your content channels.",
+        background_color: "#18181b",
         links: [
-            { title: "Subscribe on Whop", url: "#", icon: "shoppingcart" },
-            { title: "Course Login", url: "#", icon: "info" },
+            { title: "YouTube", url: "https://youtube.com", icon: "youtube" },
+            { title: "Newsletter", url: "https://substack.com", icon: "mail" },
+            { title: "Instagram", url: "https://instagram.com", icon: "instagram" },
         ],
         embeds: [],
-        preview_image: "https://images.unsplash.com/photo-1492724441997-5dc865305da7?w=800&auto=format&fit=crop&q=60",
+        preview_image: "https://images.unsplash.com/photo-1492619334764-bb669e47a984?w=800&auto=format&fit=crop&q=60",
     },
     {
         id: "indie-progress",
-        name: "Indie Progress",
-        category: "Portfolio",
-        title: "Building in Public",
-        description: "Milestone counters + shipped items",
-        background_color: "#f0fdf4",
+        name: "Building in Public",
+        category: "Landing",
+        title: "Ship Logs",
+        description: "Track your progress and share your journey as an indie hacker.",
+        background_color: "#0c0a09",
         links: [
-            { title: "Ship #1", url: "#", icon: "code" },
-            { title: "Ship #2", url: "#", icon: "code" },
+            { title: "Product Hunt", url: "https://producthunt.com", icon: "rocket" },
+            { title: "Current Project", url: "https://mycarrd.online", icon: "globe" },
         ],
         embeds: [],
-        preview_image: "https://images.unsplash.com/photo-1522071823991-b99c223a70ad?w=800&auto=format&fit=crop&q=60",
+        preview_image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&auto=format&fit=crop&q=60",
     },
     {
-        id: "dark-minimal",
-        name: "Dark Minimal",
-        category: "Profile",
-        title: "I Build Things",
-        description: "Dark mode X-style bio",
-        background_color: "#000000",
-        links: [
-            { title: "X.com", url: "https://x.com", icon: "twitter" },
-            { title: "GitHub", url: "https://github.com", icon: "github" },
-        ],
+        id: "blank",
+        name: "Blank Canvas",
+        category: "Blank",
+        title: "My Site",
+        description: "Start from scratch and build exactly what you want.",
+        background_color: "#1a1c23",
+        links: [],
         embeds: [],
-        preview_image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=60",
     }
 ];
 
 export function getTemplateById(id: string): Template {
-    return templates.find(t => t.id === id) || templates[0];
+    return templates.find((t) => t.id === id) || templates[templates.length - 1];
 }

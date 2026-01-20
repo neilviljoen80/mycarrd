@@ -21,10 +21,10 @@ export function parseSubdomain(host: string): string | null {
         // Check if it's the main domain
         const domain = parts.slice(-2).join(".");
         if (domain === "mycarrd.online") {
-            // If there are more parts, the first one is the subdomain
-            if (parts.length > 2) {
-                return parts[0];
-            }
+            const subdomain = parts[0];
+            // Ignore www
+            if (subdomain === "www") return null;
+            return subdomain;
         }
     }
 

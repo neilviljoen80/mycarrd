@@ -9,6 +9,7 @@ export async function middleware(request: NextRequest) {
         },
     });
 
+    // Create Supabase client for auth checks
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -32,9 +33,10 @@ export async function middleware(request: NextRequest) {
         }
     );
 
-    // Use more defensive host retrieval for Edge compatibility
+    // Get host from headers
     const host = request.headers.get("host") || "";
-    const pathname = request.nextUrl.pathname;
+    const url = request.nextUrl.clone();
+    const pathname = url.pathname;
 
     // Safely parse subdomain
     let subdomain: string | null = null;
@@ -47,41 +49,33 @@ export async function middleware(request: NextRequest) {
         console.error("Failed to parse domain:", e);
     }
 
-    // If root path (no subdomain) OR it's a known non-site path, serve the landing page
-    if (!subdomain && !customDomain) {
-        // Proceed to next middleware/page
-    } else {
-        // If subdomain detected, rewrite to site rendering page unless it's an internal route
-        const internalPaths = ["/_next", "/api", "/auth", "/dashboard", "/builder", "/site", "/favicon.ico"];
-        const isInternalPath = internalPaths.some(path => pathname.startsWith(path));
+    // INTERNAL PATH CHECK
+    // If it's an internal route (auth, dashboard, builder, etc.), don't do any subdomain rewrites
+    const internalPaths = ["/_next", "/api", "/auth", "/dashboard", "/builder", "/templates", "/favicon.ico", "/site"];
+    const isInternalPath = internalPaths.some(path => pathname.startsWith(path));
 
-        if (!isInternalPath) {
-            const domain = subdomain || host.split(":")[0];
-            const url = request.nextUrl.clone();
-            url.pathname = `/site/${domain}`;
-            return NextResponse.rewrite(url);
+    if (isInternalPath) {
+        // Protect dashboard routes
+        if (pathname.startsWith("/dashboard")) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                const loginUrl = request.nextUrl.clone();
+                loginUrl.pathname = "/auth/login";
+                loginUrl.searchParams.set("redirectTo", pathname);
+                return NextResponse.redirect(loginUrl);
+            }
         }
+        return response;
     }
 
-    // Protect dashboard routes
-    const protectedPaths = ["/dashboard"];
-    const isProtectedPath = protectedPaths.some((path) =>
-        request.nextUrl.pathname.startsWith(path)
-    );
-
-    if (isProtectedPath) {
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-            const url = request.nextUrl.clone();
-            url.pathname = "/auth/login";
-            url.searchParams.set("redirectTo", pathname);
-            return NextResponse.redirect(url);
-        }
+    // SUBDOMAIN REWRITING
+    if (subdomain || customDomain) {
+        const domain = subdomain || host.split(":")[0];
+        url.pathname = `/site/${domain}`;
+        return NextResponse.rewrite(url);
     }
 
+    // DEFAULT: Serve main site landing page
     return response;
 }
 
@@ -92,6 +86,7 @@ export const config = {
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
+         * - and file extensions (svg, png, etc.)
          */
         "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     ],
