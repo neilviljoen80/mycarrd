@@ -13,46 +13,35 @@ export async function createSite(templateId: string = "blank") {
         data: { user },
     } = await supabase.auth.getUser();
 
-    // Remove mandatory redirect to login
-    /*
     if (!user) {
-        redirect("/auth/login");
+        throw new Error("Not authenticated");
     }
-    */
 
     const template = getTemplateById(templateId);
 
-    let username = "guest";
-    let userId = null;
+    // Get user data
+    const { data: userData } = await (supabase
+        .from("users") as any)
+        .select("username, is_pro")
+        .eq("id", user.id)
+        .maybeSingle();
 
-    if (user) {
-        userId = user.id;
-        // Get user data
-        const { data: userData } = await (supabase
-            .from("users") as any)
-            .select("username, is_pro")
-            .eq("id", user.id)
-            .maybeSingle();
+    const username = userData?.username || "user";
 
-        if (userData) {
-            username = userData.username;
+    // Check site limit for free tier
+    if (userData && !userData.is_pro) {
+        const { count } = await (supabase
+            .from("sites") as any)
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", user.id);
 
-            // Check site limit for free tier
-            if (!userData.is_pro) {
-                const { count } = await (supabase
-                    .from("sites") as any)
-                    .select("*", { count: "exact", head: true })
-                    .eq("user_id", user.id);
-
-                if (count !== null && count >= 3) {
-                    throw new Error("Free tier limited to 3 sites. Upgrade to Pro for unlimited sites.");
-                }
-            }
+        if (count !== null && count >= 3) {
+            throw new Error("Free tier limited to 3 sites. Upgrade to Pro for unlimited sites.");
         }
     }
 
-    // Generate unique subdomain based on username or template title
-    let subdomain = generateSubdomain(username === "guest" ? template.title.split(" ")[0] : username);
+    // Generate unique subdomain based on username
+    let subdomain = generateSubdomain(username);
     let attempts = 0;
 
     while (attempts < 5) {
@@ -64,34 +53,36 @@ export async function createSite(templateId: string = "blank") {
 
         if (!existing) break;
 
-        subdomain = generateSubdomain(username === "guest" ? template.title.split(" ")[0] : username);
+        subdomain = generateSubdomain(username);
         attempts++;
     }
 
     // Create site with template data
+    const payload = {
+        user_id: user.id,
+        subdomain,
+        title: template.title,
+        description: template.description,
+        links: template.links,
+        embeds: template.embeds,
+        background_color: template.background_color,
+        is_published: true,
+    };
+
+    console.log("Creating site with payload:", JSON.stringify(payload, null, 2));
+
     const { data: site, error } = await (supabase
         .from("sites") as any)
-        .insert({
-            user_id: userId,
-            subdomain,
-            title: template.title,
-            description: template.description,
-            links: template.links,
-            embeds: template.embeds,
-            background_color: template.background_color,
-            is_published: true,
-        })
+        .insert(payload)
         .select()
         .single();
 
     if (error) {
         console.error("Create site error details:", error);
-        throw new Error(`Failed to create site: ${error.message}`);
+        throw error;
     }
 
-    if (user) {
-        revalidatePath("/dashboard");
-    }
+    revalidatePath("/dashboard");
 
     return site.id;
 }
