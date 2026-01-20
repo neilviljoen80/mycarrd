@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, ExternalLink, Edit, Trash2 } from "lucide-react";
+import { Plus, ExternalLink, Edit, Trash2, Rocket } from "lucide-react";
 import { createSite, deleteSite, logout } from "./actions";
 import { DeleteSiteButton } from "@/components/dashboard/DeleteSiteButton";
 import { CreateSiteButton } from "@/components/dashboard/CreateSiteButton";
@@ -79,7 +79,15 @@ export default async function DashboardPage() {
                         </CardHeader>
                         <CardContent>
                             {canCreateMore ? (
-                                <CreateSiteButton />
+                                <div className="flex flex-wrap gap-4">
+                                    <CreateSiteButton />
+                                    <Button asChild variant="outline">
+                                        <Link href="/templates">
+                                            <Rocket className="h-4 w-4 mr-2" />
+                                            Start with Template
+                                        </Link>
+                                    </Button>
+                                </div>
                             ) : (
                                 <div className="space-y-2">
                                     <p className="text-sm text-muted-foreground">
