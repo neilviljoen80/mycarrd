@@ -37,6 +37,8 @@ export function BuilderEditor({ site, isPro, isGuest = false }: BuilderEditorPro
     const [saving, setSaving] = useState(false);
     const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
     const [previewMode, setPreviewMode] = useState(false);
+    const [showUI, setShowUI] = useState(true);
+    const [activeTab, setActiveTab] = useState<"info" | "links" | "media">("info");
 
     // Mock site object for local preview
     const previewSite: Site = {
@@ -107,11 +109,10 @@ export function BuilderEditor({ site, isPro, isGuest = false }: BuilderEditorPro
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setPreviewMode(!previewMode)}
-                            className="md:hidden"
+                            onClick={() => setShowUI(!showUI)}
                         >
-                            {previewMode ? <Layout className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-                            {previewMode ? "Editor" : "Preview"}
+                            {showUI ? <Eye className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2 text-indigo-500" />}
+                            {showUI ? "Hide UI" : "Show UI"}
                         </Button>
                         {!isGuest && (
                             <Button asChild variant="outline" size="sm" className="hidden md:flex">
@@ -142,132 +143,121 @@ export function BuilderEditor({ site, isPro, isGuest = false }: BuilderEditorPro
                 draftData={currentDraft}
             />
 
-            {/* Editor Body */}
-            <div className="flex flex-col md:flex-row h-[calc(100vh-73px)] overflow-hidden">
-                {/* Editor Panel */}
-                <div className={`flex-1 overflow-y-auto p-4 md:p-8 space-y-6 bg-white border-r ${previewMode ? "hidden md:block" : "block"}`}>
-                    <div className="max-w-2xl mx-auto space-y-6 pb-20">
-                        {/* Basic Info */}
-                        <Card className="border-white/10 shadow-sm">
-                            <CardHeader>
-                                <CardTitle className="text-lg font-bold">Site Information</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="title">Title</Label>
-                                    <Input
-                                        id="title"
-                                        value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
-                                        placeholder="My Awesome Site"
-                                        className="rounded-xl"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="description">Description</Label>
-                                    <Textarea
-                                        id="description"
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        placeholder="A brief description of your site"
-                                        rows={3}
-                                        className="rounded-xl resize-none"
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Profile Image */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Profile Image</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <ImageUpload
-                                    currentUrl={profileImageUrl}
-                                    onUpload={(url) => setProfileImageUrl(url)}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        {/* Background Color */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Background Color</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-2">
-                                <div className="flex gap-4 items-center">
-                                    <input
-                                        type="color"
-                                        value={backgroundColor}
-                                        onChange={(e) => setBackgroundColor(e.target.value)}
-                                        className="h-10 w-20 rounded cursor-pointer"
-                                    />
-                                    <Input
-                                        value={backgroundColor}
-                                        onChange={(e) => setBackgroundColor(e.target.value)}
-                                        placeholder="#ffffff"
-                                        className="flex-1"
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Links */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Links</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <LinkEditor links={links} onChange={setLinks} />
-                            </CardContent>
-                        </Card>
-
-                        {/* X/Twitter Embeds */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>X/Twitter Thread Embeds</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <EmbedEditor embeds={embeds} onChange={setEmbeds} />
-                            </CardContent>
-                        </Card>
-
-                        {/* Custom Domain (Pro Only) */}
-                        {isPro && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Custom Domain (Pro)</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
-                                    <Label htmlFor="custom-domain">Custom Domain</Label>
-                                    <Input
-                                        id="custom-domain"
-                                        value={customDomain}
-                                        onChange={(e) => setCustomDomain(e.target.value)}
-                                        placeholder="yourdomain.com"
-                                    />
-                                    <p className="text-sm text-muted-foreground">
-                                        Point your domain's DNS to your Vercel deployment
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
-                </div>
-
-                {/* Preview Panel */}
-                <div className={`flex-1 bg-gray-100 overflow-y-auto ${previewMode ? "block" : "hidden md:flex"} items-start justify-center p-4 md:p-12`}>
-                    <div className="w-full max-w-lg bg-white shadow-2xl rounded-[3rem] overflow-hidden border-[8px] border-gray-900 aspect-[9/16] md:aspect-auto md:min-h-full relative">
-                        <div className="absolute top-0 left-0 right-0 h-6 bg-gray-900 flex items-center justify-center">
-                            <div className="w-16 h-1 bg-gray-800 rounded-full" />
-                        </div>
-                        <div className="pt-6 h-full overflow-y-auto">
-                            <SiteRenderer site={previewSite} isPro={isPro} />
-                        </div>
-                    </div>
-                </div>
+            {/* Full-screen Background Preview */}
+            <div className="fixed inset-0 pt-[73px] overflow-auto">
+                <SiteRenderer site={previewSite} isPro={isPro} />
             </div>
+
+            {/* Overlaid Editor Controls */}
+            {showUI && (
+                <div className="fixed top-[100px] left-4 md:left-8 w-full max-w-sm z-20 transition-all duration-300">
+                    <Card className="bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-2xl overflow-hidden max-h-[calc(100vh-140px)] flex flex-col">
+                        <CardHeader className="p-4 border-b">
+                            <div className="flex bg-gray-100 p-1 rounded-lg">
+                                <button
+                                    onClick={() => setActiveTab("info")}
+                                    className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${activeTab === "info" ? "bg-white shadow-sm" : "text-gray-500"}`}
+                                >
+                                    Site Info
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab("links")}
+                                    className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${activeTab === "links" ? "bg-white shadow-sm" : "text-gray-500"}`}
+                                >
+                                    Links
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab("media")}
+                                    className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${activeTab === "media" ? "bg-white shadow-sm" : "text-gray-500"}`}
+                                >
+                                    Style
+                                </button>
+                            </div>
+                        </CardHeader>
+
+                        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+                            {activeTab === "info" && (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="title" className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Site Title</Label>
+                                        <Input
+                                            id="title"
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            className="h-11 rounded-lg focus:ring-indigo-500"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="description" className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Description</Label>
+                                        <Textarea
+                                            id="description"
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            rows={2}
+                                            className="rounded-lg resize-none min-h-[80px]"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 pt-2 border-t">
+                                        <Label className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Profile Image</Label>
+                                        <ImageUpload
+                                            currentUrl={profileImageUrl}
+                                            onUpload={(url) => setProfileImageUrl(url)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === "links" && (
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Buttons & Social Links</Label>
+                                    <LinkEditor links={links} onChange={setLinks} />
+                                </div>
+                            )}
+
+                            {activeTab === "media" && (
+                                <div className="space-y-6">
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Background Color</Label>
+                                        <div className="flex gap-3">
+                                            <input
+                                                type="color"
+                                                value={backgroundColor}
+                                                onChange={(e) => setBackgroundColor(e.target.value)}
+                                                className="h-11 w-11 rounded-lg cursor-pointer border-none p-0 overflow-hidden"
+                                            />
+                                            <Input
+                                                value={backgroundColor}
+                                                onChange={(e) => setBackgroundColor(e.target.value)}
+                                                className="flex-1 h-11"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {isPro && (
+                                        <div className="space-y-3 pt-4 border-t">
+                                            <Label htmlFor="custom-domain" className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Custom Domain</Label>
+                                            <Input
+                                                id="custom-domain"
+                                                value={customDomain}
+                                                onChange={(e) => setCustomDomain(e.target.value)}
+                                                placeholder="yourdomain.com"
+                                                className="h-11"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-4 border-t bg-gray-50/50 flex justify-between items-center">
+                            <p className="text-[10px] text-gray-400 font-medium">Auto-saving draft...</p>
+                            <div className="flex gap-2">
+                                {/* Optional: Add more context actions here */}
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            )}
         </div>
     );
 }
