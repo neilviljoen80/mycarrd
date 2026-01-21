@@ -36,6 +36,7 @@ export interface Site {
             textAlign: "left" | "center" | "right";
             backgroundGradient?: string;
         };
+        footer_icons?: string[];
         typography: {
             fontFamily: "sans" | "serif" | "mono" | "system-ui";
             headingSize: string;
