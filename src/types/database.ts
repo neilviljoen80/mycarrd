@@ -58,6 +58,7 @@ export interface Site {
             spacing: string;
             cardBg: string;
             cardShadow: string;
+            backdropBlur?: string;
         };
     };
     is_published: boolean;

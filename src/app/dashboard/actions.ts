@@ -66,6 +66,7 @@ export async function createSite(templateId: string = "blank", draft?: any) {
         links: template.links,
         embeds: template.embeds,
         background_color: template.background_color,
+        background_image_url: template.background_image_url,
         styles: template.styles,
         is_published: true,
     };
